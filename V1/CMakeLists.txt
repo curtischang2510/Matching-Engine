@@ -23,7 +23,19 @@ add_executable(OrderBook
         Networking/SocketHandle.h
         Networking/TcpServer.cpp
         Networking/TcpServer.h
-        Networking/OrderListener.cpp)
+        Networking/OrderListener.cpp
+        timer/SimpleTimer.cpp
+        timer/SimpleTimer.h)
 
 target_include_directories(OrderBook PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(OrderBook PRIVATE PkgConfig::PROTOBUF)
+
+enable_testing()
+
+add_executable(OrderBookTests
+        tests/OrderBookTests.cpp
+        OrderBook.cpp
+        OrderBook.h
+        Trade.h)
+
+add_test(NAME OrderBookTests COMMAND OrderBookTests)
