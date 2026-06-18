@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package orderbook;
+
+enum Side {
+  SIDE_UNSPECIFIED = 0;
+  BID = 1;
+  ASK = 2;
+}
+
+message Order {
+  string stock_ticker = 1;
+  Side side = 2;
+  double price = 3;
+  int64 quantity = 4;
+}
+
+message Fill {
+  double price = 1;
+  int64 quantity = 2;
+}
+
+message ExecutionReport {
+  string stock_ticker = 1;
+  Side side = 2;
+  repeated Fill fills = 3;
+}

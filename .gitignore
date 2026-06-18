@@ -1,0 +1,24 @@
+# CMake build output
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+build.ninja
+.ninja_*
+
+# IDE metadata
+.idea/
+
+# Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+
+# Profiling output
+*.trace
+*.prof
+*.svg
+
+# macOS
+.DS_Store
+
