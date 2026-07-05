@@ -13,12 +13,15 @@ build.ninja
 .venv/
 __pycache__/
 *.py[cod]
+market_data_feeder/data/
 
 # Profiling output
 *.trace
 *.prof
 *.svg
+logs/
+V2/logs/
+market_data_feeder/logs/
 
 # macOS
 .DS_Store
-
