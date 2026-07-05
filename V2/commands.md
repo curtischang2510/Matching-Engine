@@ -1,0 +1,239 @@
+# V2 Commands
+
+From the repository root, enter the V2 project directory:
+
+```bash
+cd V2
+```
+
+The commands assume `cmake` and `ctest` are available on your shell `PATH`.
+If you use CLion's bundled CMake on an Apple Silicon Mac, add it locally in
+`~/.zshrc` without committing a machine-specific path:
+
+```bash
+export PATH="$HOME/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin:$PATH"
+```
+
+Restart the terminal or run `source ~/.zshrc`, then verify with
+`cmake --version`.
+
+## Prerequisites
+
+Confirm the local protobuf tools are available:
+
+```bash
+protoc --version
+pkg-config --modversion protobuf
+```
+
+Python dependencies are managed by `uv` from the shared root
+`../market_data_feeder/pyproject.toml`.
+
+## Logging Build Option
+
+V2 has a compile-time logging option:
+
+```bash
+-DORDERBOOK_ENABLE_LOGGING=ON
+```
+
+Logging is enabled by default. When it is enabled, `Exchange::addOrder` records
+latency and writes async log events through `AsyncLogger`.
+
+To compile the hot path without logging or timing code:
+
+```bash
+-DORDERBOOK_ENABLE_LOGGING=OFF
+```
+
+Because this is a CMake compile definition, changing it requires reconfiguring
+the build directory before rebuilding.
+
+## Regenerate Protobuf Code
+
+Generated C++ and Python bindings are already committed. Regenerate them after
+changing `proto/order.proto`:
+
+```bash
+protoc \
+  --cpp_out=generated \
+  --python_out=../market_data_feeder/generated \
+  -I proto \
+  proto/order.proto
+```
+
+## Debug Build
+
+Configure:
+
+```bash
+cmake \
+  -S . \
+  -B cmake-build-debug \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DORDERBOOK_ENABLE_LOGGING=ON \
+  -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
+  -DCMAKE_C_COMPILER=/usr/bin/clang
+```
+
+Compile the server:
+
+```bash
+cmake \
+  --build cmake-build-debug \
+  --target OrderBook
+```
+
+Run the server:
+
+```bash
+./cmake-build-debug/OrderBook
+```
+
+## Release Build
+
+Configure:
+
+```bash
+cmake \
+  -S . \
+  -B cmake-build-release \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DORDERBOOK_ENABLE_LOGGING=ON \
+  -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
+  -DCMAKE_C_COMPILER=/usr/bin/clang
+```
+
+Compile the server:
+
+```bash
+cmake \
+  --build cmake-build-release \
+  --target OrderBook
+```
+
+Run the server:
+
+```bash
+./cmake-build-release/OrderBook
+```
+
+## Release Build Without Logging
+
+Configure a separate build directory when comparing logging overhead:
+
+```bash
+cmake \
+  -S . \
+  -B cmake-build-release-no-logging \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DORDERBOOK_ENABLE_LOGGING=OFF \
+  -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
+  -DCMAKE_C_COMPILER=/usr/bin/clang
+```
+
+Compile the server:
+
+```bash
+cmake \
+  --build cmake-build-release-no-logging \
+  --target OrderBook
+```
+
+Run the server:
+
+```bash
+./cmake-build-release-no-logging/OrderBook
+```
+
+## Debug Versus Release
+
+Debug builds are for correctness work:
+
+- little or no compiler optimization
+- easier source-level debugging
+- variables and stack frames are easier to inspect
+- assertions remain enabled
+- slower and unsuitable for performance conclusions
+
+Release builds are for realistic performance and profiling:
+
+- compiler optimization is enabled
+- functions may be inlined or removed
+- assertions are normally disabled by `NDEBUG`
+- much faster, but source-level debugging is less direct
+
+Use Debug while fixing behavior. Use Release for latency measurements, throughput
+benchmarks, and Apple Instruments.
+
+## Unit Tests
+
+Build the test executable using the Debug configuration:
+
+```bash
+cmake \
+  --build cmake-build-debug \
+  --target OrderBookTests
+```
+
+Run all registered tests:
+
+```bash
+ctest \
+  --test-dir cmake-build-debug \
+  --output-on-failure
+```
+
+Run the test executable directly:
+
+```bash
+./cmake-build-debug/OrderBookTests
+```
+
+## Python Feeder
+
+Start the C++ server first. In another terminal:
+
+```bash
+cd ../market_data_feeder
+uv run --project . python main.py
+```
+
+The feeder is shared by all order book versions and uses the input path
+configured in `main.py`.
+
+## Python Syntax Check
+
+From the shared root `market_data_feeder` directory:
+
+```bash
+cd ../market_data_feeder
+uv run --project . python -m py_compile \
+  main.py \
+  encoder.py \
+  market_data_feeder.py \
+  message_source.py \
+  transport.py \
+  generated/order_pb2.py
+```
+
+## Python Profiling
+
+From the shared root `market_data_feeder` directory, with the C++ server
+already running:
+
+```bash
+cd ../market_data_feeder
+uv run --project . python -m cProfile -o feeder.prof main.py
+uv run --project . python -m pstats feeder.prof
+```
+
+## Apple Instruments
+
+Build Release first, then launch Instruments and select:
+
+```text
+V2/cmake-build-release/OrderBook
+```
+
+Use the Time Profiler template and run the Python feeder from another terminal.

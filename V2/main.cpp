@@ -3,21 +3,30 @@
 #include "Networking/ProtobufFrameReader.h"
 #include "Networking/TcpServer.h"
 #include "generated/order.pb.h"
+#include "Logger/LoggingConfig.h"
 
 #include <iostream>
 #include <optional>
 #include <unistd.h>
 
+#if ORDERBOOK_ENABLE_LOGGING
 #include "Logger/AsyncLogger.h"
+#endif
 
 int main()
 {
     TcpServer server{"localhost", 8001};
+#if ORDERBOOK_ENABLE_LOGGING
     AsyncLogger logger{"logs/orderbook.log", 5000};
+#endif
 
     int clientSocket = server.acceptClient();
 
+#if ORDERBOOK_ENABLE_LOGGING
     Exchange exchange{logger};
+#else
+    Exchange exchange;
+#endif
     ProtobufFrameReader reader{clientSocket};
 
     while (true)
