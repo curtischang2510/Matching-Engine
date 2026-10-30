@@ -26,6 +26,18 @@ protoc --version
 pkg-config --modversion protobuf
 ```
 
+If CMake reports that `PkgConfig::PROTOBUF` includes a nonexistent Abseil
+directory after a Homebrew update, refresh the cached protobuf paths:
+
+```bash
+cmake -U '*PROTOBUF*' -S . -B cmake-build-debug
+```
+
+Use `cmake-build-release` or `cmake-build-release-no-logging` for those
+configurations. The `-U` option removes matching CMake cache entries so
+`pkg-config` can discover the installed paths again; it does not delete source
+files or the build directory.
+
 Python dependencies are managed by `uv` from the shared root
 `../order_flow/pyproject.toml`.
 
