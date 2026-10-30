@@ -13,7 +13,7 @@ build.ninja
 .venv/
 __pycache__/
 *.py[cod]
-market_data_feeder/data/
+order_flow/data/
 
 # Profiling output
 *.trace
@@ -21,7 +21,7 @@ market_data_feeder/data/
 *.svg
 logs/
 V2/logs/
-market_data_feeder/logs/
+order_flow/logs/
 
 # macOS
 .DS_Store

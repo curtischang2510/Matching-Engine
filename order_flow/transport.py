@@ -3,6 +3,9 @@ import socket
 from types import TracebackType
 from typing import Optional, Type
 
+from logger.logger import log_latency
+
+
 class Transport(ABC):
     @abstractmethod
     def connect(self) -> None:
@@ -40,6 +43,7 @@ class TcpTransport(Transport):
         self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.sock.connect((self.host, self.port))
 
+    @log_latency("send_tcp", 10)
     def send(self, payload: bytes):
         if self.sock is None:
             raise RuntimeError("transport is not connected")

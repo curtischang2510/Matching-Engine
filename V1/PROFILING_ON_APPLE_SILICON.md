@@ -626,7 +626,7 @@ Start with `cProfile`.
 Run the feeder under `cProfile`:
 
 ```bash
-cd /Users/curtischang/Documents/C++/OrderBook/market_data_feeder
+cd /Users/curtischang/Documents/C++/OrderBook/order_flow
 uv run --project . python -m cProfile -o feeder.prof main.py
 ```
 

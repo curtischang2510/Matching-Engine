@@ -66,6 +66,8 @@ add_executable(LoggerTests
         StockTicker/StockTicker.cpp
         StockTicker/StockTicker.h)
 
+target_include_directories(LoggerTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
 add_test(NAME LoggerTests COMMAND LoggerTests)
 
 add_executable(StockTickerTests

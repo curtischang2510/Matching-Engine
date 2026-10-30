@@ -27,7 +27,7 @@ pkg-config --modversion protobuf
 ```
 
 Python dependencies are managed by `uv` from the shared root
-`../market_data_feeder/pyproject.toml`.
+`../order_flow/pyproject.toml`.
 
 ## Logging Build Option
 
@@ -57,7 +57,7 @@ changing `proto/order.proto`:
 ```bash
 protoc \
   --cpp_out=generated \
-  --python_out=../market_data_feeder/generated \
+  --python_out=../order_flow/generated \
   -I proto \
   proto/order.proto
 ```
@@ -195,7 +195,7 @@ Run the test executable directly:
 Start the C++ server first. In another terminal:
 
 ```bash
-cd ../market_data_feeder
+cd ../order_flow
 uv run --project . python main.py
 ```
 
@@ -204,10 +204,10 @@ configured in `main.py`.
 
 ## Python Syntax Check
 
-From the shared root `market_data_feeder` directory:
+From the shared root `order_flow` directory:
 
 ```bash
-cd ../market_data_feeder
+cd ../order_flow
 uv run --project . python -m py_compile \
   main.py \
   encoder.py \
@@ -219,11 +219,11 @@ uv run --project . python -m py_compile \
 
 ## Python Profiling
 
-From the shared root `market_data_feeder` directory, with the C++ server
+From the shared root `order_flow` directory, with the C++ server
 already running:
 
 ```bash
-cd ../market_data_feeder
+cd ../order_flow
 uv run --project . python -m cProfile -o feeder.prof main.py
 uv run --project . python -m pstats feeder.prof
 ```

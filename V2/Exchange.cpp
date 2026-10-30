@@ -36,7 +36,7 @@ ExecutionReport Exchange::addOrder(const Trade& trade)
         latencyNs
     );
 
-    const auto now = std::chrono::steady_clock::now().time_since_epoch();
+    const auto now = std::chrono::system_clock::now().time_since_epoch();
     logger_.tryLog(LogEvent{
         .timestampNs = static_cast<std::uint64_t>(
             std::chrono::duration_cast<std::chrono::nanoseconds>(now).count()

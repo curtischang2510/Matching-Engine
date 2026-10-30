@@ -1,5 +1,7 @@
 # Order Book Learning Project
 
+> This is an **exchange** (matching engine): it receives order flow from `order_flow/` and matches it. It is not a market maker — that is V3's C++ side.
+
 This project exists to learn C++ and market microstructure together. The goal is
 not to rush toward a finished matching engine. The goal is to build an order
 book slowly enough that each design choice teaches something useful about C++,

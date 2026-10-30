@@ -2,16 +2,16 @@
 
 ## Commands To Run
 
-Run these from the project root:
+Run these from the V1 project directory:
 
 ```bash
-cd /Users/curtischang/Documents/C++/OrderBook
+cd /Users/curtischang/Documents/C++/OrderBook/V1
 ```
 
 Generate protobuf files:
 
 ```bash
-protoc --cpp_out=generated --python_out=market_data_feeder/generated -I proto proto/order.proto
+protoc --cpp_out=generated --python_out=../order_flow/generated -I proto proto/order.proto
 ```
 
 Configure CMake:
@@ -35,23 +35,22 @@ Run the C++ server:
 Leave that terminal open. In a second terminal, run the Python feeder.
 
 ```bash
-cd /Users/curtischang/Documents/C++/OrderBook/market_data_feeder
+cd /Users/curtischang/Documents/C++/OrderBook/order_flow
 uv run --project . python main.py
 ```
 
 If you want to send one hardcoded protobuf message instead of using `data.txt`:
 
 ```bash
-cd /Users/curtischang/Documents/C++/OrderBook/market_data_feeder
+cd /Users/curtischang/Documents/C++/OrderBook/order_flow
 uv run --project . python -c "from encoder import ProtobufOrderEncoder; from transport import TcpTransport; payload = ProtobufOrderEncoder().encode('AAPL,BID,100.50,10'); transport = TcpTransport('127.0.0.1', 8001); transport.connect(); transport.send(payload); transport.close(); print('sent protobuf order')"
 ```
 
 Expected C++ server output:
 
 ```text
-Listening on localhost:8001
-Client connected
-Processed AAPL order with 0 fills
+No normal stdout output is expected in the hot path.
+Malformed protobuf messages are still reported on stderr.
 ```
 
 Run unit tests:
@@ -88,20 +87,20 @@ Generated protobuf bindings:
 
 - `generated/order.pb.h`
 - `generated/order.pb.cc`
-- `market_data_feeder/generated/order_pb2.py`
-- `market_data_feeder/generated/__init__.py`
+- `order_flow/generated/order_pb2.py`
+- `order_flow/generated/__init__.py`
 
 Updated Python feeder:
 
-- `market_data_feeder/encoder.py`
+- `order_flow/encoder.py`
   - Added `ProtobufOrderEncoder`.
   - Converts CSV-style text into protobuf bytes.
   - Adds a 4-byte length prefix before each protobuf payload.
 
-- `market_data_feeder/main.py`
+- `order_flow/main.py`
   - Switched from `NewlineTextEncoder` to `ProtobufOrderEncoder`.
 
-- `market_data_feeder/pyproject.toml`
+- shared root `order_flow/pyproject.toml`
   - Added `protobuf>=6.32.0`.
 
 Added C++ protobuf receive path:
@@ -153,4 +152,3 @@ pkg-config --libs protobuf
 
 If the server says `bind failed`, port `8001` may already be in use, or your
 environment may not allow binding sockets.
-

@@ -11,10 +11,8 @@
 int main()
 {
     TcpServer server{"localhost", 8001};
-    std::cout << "Listening on localhost:8001\n";
 
     int clientSocket = server.acceptClient();
-    std::cout << "Client connected\n";
 
     Exchange exchange;
     ProtobufFrameReader reader{clientSocket};
@@ -41,9 +39,7 @@ int main()
             continue;
         }
 
-        ExecutionReport report = exchange.addOrder(*trade);
-        std::cout << "Processed " << trade->stockTicker << " order with "
-                  << report.fulfilledTrades.size() << " fills\n";
+        exchange.addOrder(*trade);
     }
 
     ::close(clientSocket);

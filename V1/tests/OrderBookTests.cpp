@@ -4,7 +4,6 @@
 #include "../OrderBook.h"
 
 #include <cassert>
-#include <iostream>
 
 void test_non_crossing_orders_do_not_fill()
 {
@@ -39,6 +38,5 @@ int main()
     test_non_crossing_orders_do_not_fill();
     test_crossing_order_fills();
 
-    std::cout << "All OrderBook tests passed\n";
     return 0;
 }

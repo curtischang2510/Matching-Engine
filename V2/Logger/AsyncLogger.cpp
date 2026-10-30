@@ -4,7 +4,52 @@
 
 #include "AsyncLogger.h"
 
+#include "StockTicker/StockTicker.h"
+
+#include <chrono>
+#include <ctime>
 #include <filesystem>
+#include <iomanip>
+
+namespace
+{
+const char* toString(LogEventType type)
+{
+    switch (type)
+    {
+        case LogEventType::ProtoParsed:
+            return "ProtoParsed";
+        case LogEventType::OrderAdded:
+            return "OrderAdded";
+        case LogEventType::OrderMatch:
+            return "OrderMatch";
+    }
+
+    return "Unknown";
+}
+
+void writeTimestamp(std::ostream& output, const std::uint64_t timestampNs)
+{
+    using namespace std::chrono;
+
+    const auto timestamp = time_point_cast<system_clock::duration>(
+        system_clock::time_point{} + nanoseconds{timestampNs}
+    );
+    const std::time_t epochSeconds = system_clock::to_time_t(timestamp);
+    const std::uint64_t nanosecondPart = timestampNs % 1'000'000'000;
+
+    std::tm time{};
+    gmtime_r(&epochSeconds, &time);
+
+    output << std::put_time(&time, "%Y-%m-%dT%H:%M:%S")
+           << '.'
+           << std::setw(9)
+           << std::setfill('0')
+           << nanosecondPart
+           << std::setfill(' ')
+           << 'Z';
+}
+}
 
 AsyncLogger::AsyncLogger(std::string outputPath, std::size_t queueCapacity)
     : queue_(queueCapacity),
@@ -70,10 +115,11 @@ void AsyncLogger::drainBatch()
 
 void AsyncLogger::writeEvent(const LogEvent& event)
 {
-    output_ << event.timestampNs << ','
-            << static_cast<int>(event.type) << ','
-            << event.symbolId << ','
+    writeTimestamp(output_, event.timestampNs);
+    output_ << ','
+            << toString(event.type) << ','
+            << toString(static_cast<StockTicker>(event.symbolId)) << ','
             << event.priceTicks << ','
             << event.qty << ','
-            << event.latency << '\n';
+            << event.latency << "ns\n";
 }

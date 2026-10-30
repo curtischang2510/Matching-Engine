@@ -25,7 +25,8 @@ add_executable(OrderBook
         Networking/TcpServer.h
         Networking/OrderListener.cpp
         timer/SimpleTimer.cpp
-        timer/SimpleTimer.h)
+        timer/SimpleTimer.h
+        main.cpp)
 
 target_include_directories(OrderBook PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(OrderBook PRIVATE PkgConfig::PROTOBUF)

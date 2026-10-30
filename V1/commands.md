@@ -1,17 +1,21 @@
 # V1 Commands
 
-Run these commands from the V1 project directory:
+From the repository root, enter the V1 project directory:
 
 ```bash
-cd "/Users/curtischang/Documents/C++/OrderBook/V1"
+cd V1
 ```
 
-The commands below use CLion's bundled CMake because `cmake` is not currently on
-the shell `PATH`:
+The commands assume `cmake` and `ctest` are available on your shell `PATH`.
+If you use CLion's bundled CMake on an Apple Silicon Mac, add it locally in
+`~/.zshrc` without committing a machine-specific path:
 
-```text
-/Users/curtischang/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake
+```bash
+export PATH="$HOME/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin:$PATH"
 ```
+
+Restart the terminal or run `source ~/.zshrc`, then verify with
+`cmake --version`.
 
 ## Prerequisites
 
@@ -22,7 +26,8 @@ protoc --version
 pkg-config --modversion protobuf
 ```
 
-Python dependencies are managed by `uv` from `market_data_feeder/pyproject.toml`.
+Python dependencies are managed by `uv` from the shared root
+`../order_flow/pyproject.toml`.
 
 ## Regenerate Protobuf Code
 
@@ -32,7 +37,7 @@ changing `proto/order.proto`:
 ```bash
 protoc \
   --cpp_out=generated \
-  --python_out=market_data_feeder/generated \
+  --python_out=../order_flow/generated \
   -I proto \
   proto/order.proto
 ```
@@ -42,7 +47,7 @@ protoc \
 Configure:
 
 ```bash
-/Users/curtischang/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake \
+cmake \
   -S . \
   -B cmake-build-debug \
   -DCMAKE_BUILD_TYPE=Debug \
@@ -53,7 +58,7 @@ Configure:
 Compile the server:
 
 ```bash
-/Users/curtischang/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake \
+cmake \
   --build cmake-build-debug \
   --target OrderBook
 ```
@@ -69,7 +74,7 @@ Run the server:
 Configure:
 
 ```bash
-/Users/curtischang/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake \
+cmake \
   -S . \
   -B cmake-build-release \
   -DCMAKE_BUILD_TYPE=Release \
@@ -80,7 +85,7 @@ Configure:
 Compile the server:
 
 ```bash
-/Users/curtischang/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake \
+cmake \
   --build cmake-build-release \
   --target OrderBook
 ```
@@ -116,7 +121,7 @@ benchmarks, and Apple Instruments.
 Build the test executable using the Debug configuration:
 
 ```bash
-/Users/curtischang/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake \
+cmake \
   --build cmake-build-debug \
   --target OrderBookTests
 ```
@@ -124,7 +129,7 @@ Build the test executable using the Debug configuration:
 Run all registered tests:
 
 ```bash
-/Users/curtischang/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/ctest \
+ctest \
   --test-dir cmake-build-debug \
   --output-on-failure
 ```
@@ -140,17 +145,19 @@ Run the test executable directly:
 Start the C++ server first. In another terminal:
 
 ```bash
-cd "/Users/curtischang/Documents/C++/OrderBook/V1/market_data_feeder"
+cd ../order_flow
 uv run --project . python main.py
 ```
 
-The feeder currently uses `fifty_thousand_data.txt`, as configured in `main.py`.
+The feeder is shared by all order book versions and uses the input path
+configured in `main.py`.
 
 ## Python Syntax Check
 
-From `V1/market_data_feeder`:
+From the shared root `order_flow` directory:
 
 ```bash
+cd ../order_flow
 uv run --project . python -m py_compile \
   main.py \
   encoder.py \
@@ -162,9 +169,11 @@ uv run --project . python -m py_compile \
 
 ## Python Profiling
 
-From `V1/market_data_feeder`, with the C++ server already running:
+From the shared root `order_flow` directory, with the C++ server
+already running:
 
 ```bash
+cd ../order_flow
 uv run --project . python -m cProfile -o feeder.prof main.py
 uv run --project . python -m pstats feeder.prof
 ```
@@ -174,8 +183,7 @@ uv run --project . python -m pstats feeder.prof
 Build Release first, then launch Instruments and select:
 
 ```text
-/Users/curtischang/Documents/C++/OrderBook/V1/cmake-build-release/OrderBook
+V1/cmake-build-release/OrderBook
 ```
 
 Use the Time Profiler template and run the Python feeder from another terminal.
-

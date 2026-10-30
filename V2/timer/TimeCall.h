@@ -17,9 +17,8 @@ auto timeCall(Func&& func, std::uint32_t& latencyNs)
     auto result = std::invoke(std::forward<Func>(func));
     const auto end = std::chrono::steady_clock::now();
 
-    latencyNs = static_cast<std::uint32_t>(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
-    );
+    const auto measuredNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    latencyNs = measuredNs == 0 ? 1 : static_cast<std::uint32_t>(measuredNs);
 
     return result;
 }

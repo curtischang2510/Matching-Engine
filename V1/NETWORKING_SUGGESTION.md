@@ -6,7 +6,7 @@ Use two separate programs:
 
 - `orderbook_server`: a C++ process that owns the `Exchange` and receives market
   data messages over a local network socket.
-- `market_data_feeder`: a replay process that reads historical or generated
+- `order_flow`: a replay process that reads historical or generated
   orders from disk and sends them to the server over localhost.
 
 This is the best fit for the project because it teaches networking without
@@ -46,7 +46,7 @@ from disk. The disk read happens outside the matching process.
 The flow becomes:
 
 ```text
-file or generator -> market_data_feeder -> localhost socket -> orderbook_server -> Exchange -> OrderBook
+file or generator -> order_flow -> localhost socket -> orderbook_server -> Exchange -> OrderBook
 ```
 
 This simulates the shape of a real system:
